@@ -24,6 +24,7 @@ app.MapGet("/", () => Results.Redirect("/docs")).ExcludeFromDescription();
 app.MapHealthEndpoints();
 app.MapDeviceEndpoints();
 app.MapReadingEndpoints();
+app.MapArchiveEndpoints();
 
 app.Run();
 
