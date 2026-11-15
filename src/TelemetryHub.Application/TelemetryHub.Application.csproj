@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TelemetryHub.Domain\TelemetryHub.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
