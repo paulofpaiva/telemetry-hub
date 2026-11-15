@@ -72,6 +72,36 @@ internal sealed class QuestDbReadingQueries(QuestDbDataSource dataSource) : IRea
         return [.. rows.Select(row => new ReadingWindow(AsUtc(row.Timestamp), row.Avg, row.Min, row.Max, row.Count))];
     }
 
+    public async Task<IReadOnlyList<DeviceSensorAggregate>> GetAggregatesAsync(
+        DateTimeOffset from,
+        DateTimeOffset to,
+        CancellationToken cancellationToken)
+    {
+        const string sql = $"""
+            SELECT device_id AS DeviceId, sensor_type AS SensorType, unit AS Unit,
+                   avg(value) AS Avg, min(value) AS Min, max(value) AS Max, count() AS Count
+            FROM {QuestDbSchema.ReadingsTable}
+            WHERE timestamp >= @from AND timestamp < @to
+            GROUP BY device_id, sensor_type, unit
+            """;
+
+        await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
+        var rows = await connection.QueryAsync<AggregateRow>(
+            new CommandDefinition(sql, new { from = from.UtcDateTime, to = to.UtcDateTime }, cancellationToken: cancellationToken));
+
+        return
+        [
+            .. rows.Select(row => new DeviceSensorAggregate(
+                row.DeviceId,
+                row.SensorType,
+                row.Unit ?? string.Empty,
+                row.Avg,
+                row.Min,
+                row.Max,
+                row.Count)),
+        ];
+    }
+
     // QuestDB timestamps are UTC but arrive without a time zone.
     private static DateTimeOffset AsUtc(DateTime timestamp) =>
         new(DateTime.SpecifyKind(timestamp, DateTimeKind.Utc));
@@ -90,6 +120,23 @@ internal sealed class QuestDbReadingQueries(QuestDbDataSource dataSource) : IRea
     private sealed class WindowRow
     {
         public DateTime Timestamp { get; set; }
+
+        public double Avg { get; set; }
+
+        public double Min { get; set; }
+
+        public double Max { get; set; }
+
+        public long Count { get; set; }
+    }
+
+    private sealed class AggregateRow
+    {
+        public string DeviceId { get; set; } = string.Empty;
+
+        public string SensorType { get; set; } = string.Empty;
+
+        public string? Unit { get; set; }
 
         public double Avg { get; set; }
 

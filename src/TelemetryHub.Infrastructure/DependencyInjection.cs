@@ -3,9 +3,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TelemetryHub.Application.Abstractions;
+using TelemetryHub.Infrastructure.Archiving;
 using TelemetryHub.Infrastructure.Mqtt;
 using TelemetryHub.Infrastructure.Persistence;
 using TelemetryHub.Infrastructure.QuestDb;
+using TelemetryHub.Infrastructure.Storage;
 
 namespace TelemetryHub.Infrastructure;
 
@@ -19,6 +21,7 @@ public static class DependencyInjection
         services.AddPersistence(configuration);
         services.AddQuestDb(configuration);
         services.AddMqttIngestion(configuration);
+        services.AddArchiving(configuration);
 
         return services;
     }
@@ -73,5 +76,28 @@ public static class DependencyInjection
         services.AddSingleton<MqttIngestionService>();
         services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<MqttIngestionService>());
         services.AddHealthChecks().AddCheck<MqttIngestionService>("mqtt", tags: [ReadyTag]);
+    }
+
+    private static void AddArchiving(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<S3Options>()
+            .Bind(configuration.GetSection(S3Options.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddOptions<ArchiveOptions>()
+            .Bind(configuration.GetSection(ArchiveOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton(serviceProvider =>
+            S3ClientFactory.Create(serviceProvider.GetRequiredService<IOptions<S3Options>>().Value));
+
+        // One instance serves as both the storage and its own health check.
+        services.AddSingleton<S3ArchiveStorage>();
+        services.AddSingleton<IArchiveStorage>(serviceProvider => serviceProvider.GetRequiredService<S3ArchiveStorage>());
+        services.AddHostedService<ArchiveJob>();
+
+        services.AddHealthChecks().AddCheck<S3ArchiveStorage>("s3", tags: [ReadyTag]);
     }
 }
