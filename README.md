@@ -1,5 +1,7 @@
 # telemetry-hub
 
+[![CI](https://github.com/paulofpaiva/telemetry-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/paulofpaiva/telemetry-hub/actions/workflows/ci.yml)
+
 Real-time industrial IoT telemetry ingestion API built with .NET 10.
 
 Sensors on industrial equipment (pressure, temperature, vibration) publish readings over MQTT.
@@ -247,6 +249,8 @@ dotnet test
   S3-compatible store, host the API in-process against them and exercise the real flow:
   publish over MQTT, query the series over HTTP, archive a window, list and download the file.
   They need Docker running.
+
+GitHub Actions runs the build and both suites on every pull request and on `main`.
 
 ## Development
 
