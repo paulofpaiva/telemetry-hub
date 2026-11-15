@@ -12,6 +12,8 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.15" />
+    <PackageVersion Include="MQTTnet" Version="5.2.0.1603" />
     <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.21.0" />
   </ItemGroup>
