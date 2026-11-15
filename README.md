@@ -17,7 +17,7 @@ account required.
 - MQTT (Mosquitto + MQTTnet)
 - QuestDB for time-series data
 - PostgreSQL + EF Core for the device registry
-- S3-compatible storage (MinIO locally) for archives
+- S3-compatible storage (RustFS locally, AWS S3 with only env changes) for archives
 - Docker Compose, Testcontainers
 
 ## Solution layout
@@ -33,6 +33,17 @@ tests/
   TelemetryHub.UnitTests
   TelemetryHub.IntegrationTests
 ```
+
+## Run locally
+
+```bash
+cp .env.example .env
+docker compose up -d --build
+```
+
+This starts Mosquitto, QuestDB, PostgreSQL, an S3-compatible store (RustFS), the API on
+`http://localhost:8080` and the simulator. The archive bucket is created automatically.
+Every address and credential comes from `.env`.
 
 ## Build
 
