@@ -129,6 +129,7 @@ services:
       S3__SecretKey: ${S3_SECRET_KEY}
       Archive__IntervalSeconds: ${ARCHIVE_INTERVAL_SECONDS}
       Archive__WindowMinutes: ${ARCHIVE_WINDOW_MINUTES}
+      Archive__GraceSeconds: ${ARCHIVE_GRACE_SECONDS}
     ports:
       - "${API_PORT}:8080"
 
