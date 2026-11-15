@@ -1,8 +1,10 @@
 using TelemetryHub.Application;
+using TelemetryHub.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
+builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
