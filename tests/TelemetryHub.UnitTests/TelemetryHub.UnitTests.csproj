@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\TelemetryHub.Application\TelemetryHub.Application.csproj" />
+    <ProjectReference Include="..\..\src\TelemetryHub.Infrastructure\TelemetryHub.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
