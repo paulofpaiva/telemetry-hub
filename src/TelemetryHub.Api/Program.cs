@@ -23,6 +23,7 @@ app.MapScalarApiReference("/docs", options => options.WithTitle("Telemetry Hub A
 app.MapGet("/", () => Results.Redirect("/docs")).ExcludeFromDescription();
 app.MapHealthEndpoints();
 app.MapDeviceEndpoints();
+app.MapReadingEndpoints();
 
 app.Run();
 

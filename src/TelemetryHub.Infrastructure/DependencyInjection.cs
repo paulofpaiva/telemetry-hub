@@ -51,6 +51,7 @@ public static class DependencyInjection
 
         services.AddSingleton<QuestDbDataSource>();
         services.AddSingleton<IReadingWriter, QuestDbReadingWriter>();
+        services.AddSingleton<IReadingQueries, QuestDbReadingQueries>();
 
         // Order matters: the table must exist before the flush timer and the subscriber start.
         services.AddHostedService<QuestDbSchemaInitializer>();
