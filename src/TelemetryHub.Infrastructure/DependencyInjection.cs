@@ -3,8 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TelemetryHub.Application.Abstractions;
+using TelemetryHub.Infrastructure.Mqtt;
 using TelemetryHub.Infrastructure.Persistence;
-using TelemetryHub.Infrastructure.Readings;
+using TelemetryHub.Infrastructure.QuestDb;
 
 namespace TelemetryHub.Infrastructure;
 
@@ -16,7 +17,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddPersistence(configuration);
-        services.AddSingleton<IReadingWriter, DiscardingReadingWriter>();
+        services.AddQuestDb(configuration);
+        services.AddMqttIngestion(configuration);
 
         return services;
     }
@@ -38,5 +40,37 @@ public static class DependencyInjection
         services.AddHostedService<DatabaseMigrator>();
 
         services.AddHealthChecks().AddDbContextCheck<AppDbContext>("postgres", tags: [ReadyTag]);
+    }
+
+    private static void AddQuestDb(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<QuestDbOptions>()
+            .Bind(configuration.GetSection(QuestDbOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton<QuestDbDataSource>();
+        services.AddSingleton<IReadingWriter, QuestDbReadingWriter>();
+
+        // Order matters: the table must exist before the flush timer and the subscriber start.
+        services.AddHostedService<QuestDbSchemaInitializer>();
+        services.AddHostedService<QuestDbFlushService>();
+
+        services.AddHealthChecks().AddCheck<QuestDbHealthCheck>("questdb", tags: [ReadyTag]);
+    }
+
+    private static void AddMqttIngestion(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<MqttOptions>()
+            .Bind(configuration.GetSection(MqttOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.AddSingleton<IngestionMetrics>();
+
+        // One instance serves as both the background subscriber and its own health check.
+        services.AddSingleton<MqttIngestionService>();
+        services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<MqttIngestionService>());
+        services.AddHealthChecks().AddCheck<MqttIngestionService>("mqtt", tags: [ReadyTag]);
     }
 }
