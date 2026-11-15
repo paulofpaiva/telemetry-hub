@@ -19,7 +19,7 @@ public sealed partial class LoggingBehavior<TRequest, TResponse>(ILogger<Logging
 
         try
         {
-            var response = await next();
+            var response = await next(cancellationToken);
             LogHandled(logger, requestName, Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds);
             return response;
         }
