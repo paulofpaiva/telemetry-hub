@@ -103,6 +103,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_HTTP_PORTS: "8080"
+      Logging__Console__FormatterName: json
       Mqtt__Host: ${MQTT_HOST}
       Mqtt__Port: ${MQTT_PORT}
       Mqtt__Username: ${MQTT_USERNAME}
@@ -140,6 +141,7 @@ services:
         condition: service_healthy
     environment:
       DOTNET_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      Logging__Console__FormatterName: json
       Mqtt__Host: ${MQTT_HOST}
       Mqtt__Port: ${MQTT_PORT}
       Mqtt__Username: ${MQTT_USERNAME}
